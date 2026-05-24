@@ -6,7 +6,7 @@ class Settings(BaseSettings):
 
     openai_api_key: str
     api_base_url: str = "https://openrouter.ai/api/v1"
-    openai_model: str = "qwen/qwen3-14b"
+    openai_model: str = "meta-llama/llama-3.3-70b-instruct:free"
 
     database_url: str = "postgresql+asyncpg://parseflow:parseflow@localhost:5432/parseflow"
 
