@@ -5,7 +5,8 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
     openai_api_key: str
-    openai_model: str = "gpt-4o-mini"
+    api_base_url: str = "https://openrouter.ai/api/v1"
+    openai_model: str = "meta-llama/llama-3.3-70b-instruct:free"
 
     database_url: str = "postgresql+asyncpg://parseflow:parseflow@localhost:5432/parseflow"
 
