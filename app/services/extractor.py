@@ -10,7 +10,7 @@ from app.schemas import SCHEMA_MAP
 
 T = TypeVar("T", bound=BaseModel)
 
-client = AsyncOpenAI(api_key=settings.openai_api_key)
+client = AsyncOpenAI(api_key=settings.openai_api_key, base_url=settings.api_base_url)
 
 SYSTEM_PROMPT = """You are a precise document parser. Extract structured information from the document and return it as valid JSON.
 
@@ -91,10 +91,22 @@ async def _call_llm(messages: list[dict]) -> str:
     response = await client.chat.completions.create(
         model=settings.openai_model,
         messages=messages,
-        response_format={"type": "json_object"},
         temperature=0,
     )
-    return response.choices[0].message.content or ""
+    return _strip_fences(response.choices[0].message.content or "")
+
+
+def _strip_fences(text: str) -> str:
+    """Remove markdown code fences that some models wrap JSON in."""
+    text = text.strip()
+    if text.startswith("```"):
+        lines = text.splitlines()
+        # drop opening fence line and closing ```
+        inner = lines[1:] if lines[0].startswith("```") else lines
+        if inner and inner[-1].strip() == "```":
+            inner = inner[:-1]
+        text = "\n".join(inner).strip()
+    return text
 
 
 async def _classify(text: str) -> str:
