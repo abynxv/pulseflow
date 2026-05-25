@@ -3,7 +3,7 @@ from typing import Any, Literal, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile
 from pydantic import BaseModel
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
@@ -98,10 +98,10 @@ async def list_results(
     result = await db.execute(query)
     rows = result.scalars().all()
 
-    count_query = select(ParseResult)
+    count_query = select(func.count()).select_from(ParseResult)
     if document_type:
         count_query = count_query.where(ParseResult.document_type == document_type)
-    total = len((await db.execute(count_query)).scalars().all())
+    total = (await db.execute(count_query)).scalar_one()
 
     return ResultListResponse(total=total, items=[_to_response(r) for r in rows])
 
